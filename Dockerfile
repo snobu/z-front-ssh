@@ -118,4 +118,6 @@ CMD service ssh start
 
 ENTRYPOINT ["/bin/bash"]
 
+CMD ["/usr/sbin/sshd", "-4"]
 CMD ["/run_zabbix_component.sh", "frontend", "postgresql", "nginx"]
+

@@ -105,7 +105,6 @@ ADD run_zabbix_component.sh /
 
 COPY sshd_config /etc/ssh/
 
-# -------- SSHD ---------
 # Expose SSH for Kudu Tux
 RUN apt-get update \ 
   && apt-get install -y --no-install-recommends openssh-server \
@@ -113,12 +112,8 @@ RUN apt-get update \
 
 RUN mkdir -p /run/sshd
 
-RUN service ssh start
-# -------- SSHD ---------
-
 ENTRYPOINT ["/bin/bash"]
 
-RUN /usr/sbin/sshd
-RUN service ssh start
+# sshd is started in the below script
 CMD ["/run_zabbix_component.sh", "frontend", "postgresql", "nginx"]
 

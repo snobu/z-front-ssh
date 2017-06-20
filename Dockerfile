@@ -1,4 +1,5 @@
 FROM ubuntu:trusty
+LABEL maintainer "Alexey Pustovalov <alexey.pustovalov@zabbix.com>"
 
 ARG APT_FLAGS_COMMON="-qq -y"
 ARG APT_FLAGS_PERSISTANT="${APT_FLAGS_COMMON} --no-install-recommends"
@@ -43,9 +44,9 @@ RUN DISTRIB_CODENAME=$(/bin/bash -c 'source /etc/lsb-release && echo $DISTRIB_CO
     rm -rf /var/cache/nginx/* && \
     rm -rf /var/lib/apt/lists/*
 
-ARG MAJOR_VERSION=3.4
-ARG ZBX_VERSION=${MAJOR_VERSION}
-ARG ZBX_SOURCES=svn://svn.zabbix.com/trunk/
+ARG MAJOR_VERSION=3.2
+ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_SOURCES=svn://svn.zabbix.com/tags/${ZBX_VERSION}/
 ENV ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} DB_TYPE=${DB_TYPE}
 
 ADD conf/tmp/font-config /tmp/font-config
@@ -88,23 +89,24 @@ RUN apt-get ${APT_FLAGS_COMMON} update && \
     apt-get ${APT_FLAGS_COMMON} clean && \
     rm -rf /var/lib/apt/lists/*
 
-EXPOSE 80/TCP 2222/TCP
+EXPOSE 80/TCP 443/TCP 2222/TCP
 
 WORKDIR /usr/share/zabbix
 
+VOLUME ["/etc/ssl/nginx"]
+
 ADD conf/etc/supervisor/ /etc/supervisor/
 ADD conf/etc/zabbix/nginx.conf /etc/zabbix/
+ADD conf/etc/zabbix/nginx_ssl.conf /etc/zabbix/
 ADD conf/etc/zabbix/web/zabbix.conf.php /etc/zabbix/web/
 ADD conf/etc/nginx/nginx.conf /etc/nginx/
 ADD conf/etc/php5/fpm/conf.d/99-zabbix.ini /etc/php5/fpm/conf.d/
 ADD run_zabbix_component.sh /
 
-CMD ["/run_zabbix_component.sh", "frontend", "postgresql", "nginx"]
-
-
 COPY sshd_config /etc/ssh/
 
-# SSH Server support for Tux
+# -------- SSHD ---------
+# Expose SSH for Kudu Tux
 RUN apt-get update \ 
   && apt-get install -y --no-install-recommends openssh-server \
   && echo "root:Docker!" | chpasswd
@@ -112,3 +114,8 @@ RUN apt-get update \
 RUN mkdir -p /run/sshd
 
 CMD service ssh start
+# -------- SSHD ---------
+
+ENTRYPOINT ["/bin/bash"]
+
+CMD ["/run_zabbix_component.sh", "frontend", "postgresql", "nginx"]

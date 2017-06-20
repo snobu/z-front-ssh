@@ -113,11 +113,12 @@ RUN apt-get update \
 
 RUN mkdir -p /run/sshd
 
-CMD service ssh start
+RUN service ssh start
 # -------- SSHD ---------
 
 ENTRYPOINT ["/bin/bash"]
 
-CMD ["/usr/sbin/sshd", "-4"]
+RUN /usr/sbin/sshd
+RUN service ssh start
 CMD ["/run_zabbix_component.sh", "frontend", "postgresql", "nginx"]
 

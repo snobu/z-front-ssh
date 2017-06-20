@@ -2,6 +2,9 @@
 
 set +e
 
+# WebSSH from Kudu
+service ssh start
+
 # Script trace mode
 if [ "${DEBUG_MODE}" == "true" ]; then
     set -o xtrace

@@ -99,8 +99,6 @@ ADD conf/etc/nginx/nginx.conf /etc/nginx/
 ADD conf/etc/php5/fpm/conf.d/99-zabbix.ini /etc/php5/fpm/conf.d/
 ADD run_zabbix_component.sh /
 
-ENTRYPOINT ["/bin/bash"]
-
 CMD ["/run_zabbix_component.sh", "frontend", "postgresql", "nginx"]
 
 
